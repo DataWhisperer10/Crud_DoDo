@@ -16,11 +16,12 @@ class _HomeScreenState extends State<HomeScreen> {
           title: const Text("ToDo List"),
         ),
         floatingActionButton: FloatingActionButton.extended(
-            onPressed: () {}, label: const Text("Add Todo")));
+            onPressed: navigateToAdd, label: const Text("Add Todo")));
   }
 
   void navigateToAdd() {
-    final route = MaterialPageRoute(builder: ((context) => AddPageScreen()));
+    final route =
+        MaterialPageRoute(builder: (context) => const AddPageScreen());
     Navigator.push(context, route);
   }
 }
