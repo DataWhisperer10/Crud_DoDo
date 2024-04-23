@@ -35,44 +35,60 @@ class _AddPageScreenState extends State<AddPageScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? "Edit Todo" : "Add Todo"),
+        title: Center(child: Text(isEdit ? "Edit Todo" : "Add Todo")),
+        elevation: 10,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              TextField(
-                controller: titleEditingController,
-                decoration: const InputDecoration(
-                  labelText: "Title",
+      body: Stack(children: [
+        Image.asset(
+          "assets/bgImage.jpg",
+          fit: BoxFit.contain,
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: titleEditingController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                    labelText: "Title",
+                  ),
                 ),
-              ),
-              TextField(
-                controller: descriptionEditingController,
-                decoration: const InputDecoration(labelText: "Description"),
-                minLines: 5,
-                maxLines: 10,
-                keyboardType: TextInputType.multiline,
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple),
-                  onPressed: isEdit ? updateData : submitData,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Text(
-                      isEdit ? "Update" : "Submit",
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                  )),
-            ],
+                const SizedBox(
+                  height: 20,
+                ),
+                TextField(
+                  controller: descriptionEditingController,
+                  decoration: const InputDecoration(
+                    labelText: "Description",
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10))),
+                  ),
+                  minLines: 5,
+                  maxLines: 10,
+                  keyboardType: TextInputType.multiline,
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple),
+                    onPressed: isEdit ? updateData : submitData,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Text(
+                        isEdit ? "Update" : "Submit",
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                    )),
+              ],
+            ),
           ),
         ),
-      ),
+      ]),
     );
   }
 

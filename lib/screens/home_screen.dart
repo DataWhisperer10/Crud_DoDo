@@ -1,7 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:todo_crud/api_services/todo_services.dart';
 import 'package:todo_crud/screens/add_page_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,52 +25,70 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("ToDo List"),
+        title: const Center(child: Text("ToDo List")),
       ),
-      body: Visibility(
-        visible: isLoading,
-        child: const Center(
-          child: CircularProgressIndicator(),
-        ),
-        replacement: RefreshIndicator(
-          onRefresh: fetchTodo,
-          child: ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index] as Map;
-              final id = item['_id'] as String;
-              return ListTile(
-                leading: CircleAvatar(child: Text('${index + 1}')),
-                title: Text(item['title']),
-                subtitle: Text(item['description']),
-                trailing: PopupMenuButton(
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      navigateToEdit(item);
-                      //open the edit screen
-                    } else if (value == 'delete') {
-//open the delete screen
-                      deleteById(id);
-                    }
-                  },
-                  itemBuilder: (context) {
-                    return [
-                      const PopupMenuItem(
-                        child: Text("Edit"),
-                        value: 'edit',
-                      ),
-                      const PopupMenuItem(
-                        child: Text("Delete"),
-                        value: 'delete',
-                      ),
-                    ];
-                  },
+      body: Stack(children: [
+        SizedBox(
+            height: double.infinity,
+            width: double.infinity,
+            child: Image.asset("assets/bgImage.jpg")),
+        Visibility(
+          visible: isLoading,
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+          replacement: RefreshIndicator(
+            onRefresh: fetchTodo,
+            child: Visibility(
+              visible: items.isNotEmpty,
+              replacement: Center(
+                child: Text(
+                  "Click On Add Todo ",
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
-              );
-            },
+              ),
+              child: ListView.builder(
+                itemCount: items.length,
+                padding: const EdgeInsets.all(10),
+                itemBuilder: (context, index) {
+                  final item = items[index] as Map;
+                  final id = item['_id'] as String;
+                  return Card(
+                    child: ListTile(
+                      leading: CircleAvatar(child: Text('${index + 1}')),
+                      title: Text(item['title']),
+                      subtitle: Text(item['description']),
+                      trailing: PopupMenuButton(
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            navigateToEdit(item);
+                            //open the edit screen
+                          } else if (value == 'delete') {
+                            //open the delete screen
+                            deleteById(id);
+                          }
+                        },
+                        itemBuilder: (context) {
+                          return [
+                            const PopupMenuItem(
+                              child: Text("Edit"),
+                              value: 'edit',
+                            ),
+                            const PopupMenuItem(
+                              child: Text("Delete"),
+                              value: 'delete',
+                            ),
+                          ];
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
         ),
-      ),
+      ]),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: navigateToAdd,
         label: const Text("Add Todo"),
@@ -101,10 +117,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> deleteById(String id) async {
-    final url = 'https://api.nstack.in/v1/todos/$id';
-    final uri = Uri.parse(url);
-    final response = await http.delete(uri);
-    if (response.statusCode == 200) {
+    final isSuccess = await TodoServices.deletById(id);
+    if (isSuccess) {
       final filtered = items.where((element) => element['_id'] != id).toList();
       setState(() {
         items = filtered;
@@ -115,15 +129,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> fetchTodo() async {
-    final url = "https://api.nstack.in/v1/todos?page=1&limit=10";
-    final uri = Uri.parse(url);
-    final response = await http.get(uri);
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body) as Map;
-      final result = json['items'] as List;
+    final response = await TodoServices.fetchTodos();
+
+    if (response != null) {
       setState(() {
-        items = result;
+        items = response;
       });
+    } else {
+      showFailureMessage("Something Went Wrong");
     }
     setState(() {
       isLoading = false;

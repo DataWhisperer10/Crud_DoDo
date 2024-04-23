@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:todo_crud/screens/home_screen.dart';
+import 'package:todo_crud/screens/splash_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }
