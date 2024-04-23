@@ -21,8 +21,13 @@ class _AddPageScreenState extends State<AddPageScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.todo != null) {
+    final todo = widget.todo;
+    if (todo != null) {
       isEdit = true;
+      final title = todo['title'];
+      final description = todo['description'];
+      titleEditingController.text = title;
+      descriptionEditingController.text = description;
     }
   }
 
@@ -56,7 +61,7 @@ class _AddPageScreenState extends State<AddPageScreen> {
               ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurple),
-                  onPressed: submitData,
+                  onPressed: isEdit ? updateData : submitData,
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Text(
@@ -69,6 +74,37 @@ class _AddPageScreenState extends State<AddPageScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> updateData() async {
+    final todo = widget.todo;
+    if (todo == null) {
+      print("You can not call Updated todo data");
+      return;
+    }
+    final id = todo['_id'];
+    // final isCompleted = todo['is_completed'];
+    final title = titleEditingController.text;
+    final description = descriptionEditingController.text;
+    final body = {
+      "title": title,
+      "description": description,
+      "is_completed": false,
+    };
+
+    //Update data to the server
+    final url = 'https://api.nstack.in/v1/todos/$id';
+    final uri = Uri.parse(url);
+    final response = await http.put(
+      uri,
+      body: jsonEncode(body),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200) {
+      showSuccessMessage("Todo Updated Successfully");
+    } else {
+      showFailureMessage("Failed to Update the Todo");
+    }
   }
 
   Future<void> submitData() async {
@@ -94,13 +130,9 @@ class _AddPageScreenState extends State<AddPageScreen> {
     if (response.statusCode == 201) {
       titleEditingController.text = '';
       descriptionEditingController.text = '';
-
       showSuccessMessage("Todo Created Successfully");
     } else {
       showFailureMessage("Todo Creation Failed");
-      print("Creation Failed");
-      print(response.statusCode);
-      print(response.body);
     }
   }
 

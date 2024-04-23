@@ -80,10 +80,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void navigateToEdit(Map item) {
+  Future<void> navigateToEdit(Map item) async {
     final route =
         MaterialPageRoute(builder: (context) => AddPageScreen(todo: item));
-    Navigator.push(context, route);
+    await Navigator.push(context, route);
+    setState(() {
+      isLoading = true;
+    });
+    fetchTodo();
   }
 
   Future<void> navigateToAdd() async {
