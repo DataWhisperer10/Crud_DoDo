@@ -12,6 +12,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool isLoading = true;
   List items = [];
 
   @override
@@ -27,16 +28,31 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(
           title: const Text("ToDo List"),
         ),
-        body: ListView.builder(
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final item = items[index] as Map;
-              return ListTile(
-                leading: CircleAvatar(child: Text('${index + 1}')),
-                title: Text(item['title']),
-                subtitle: Text(item['description']),
-              );
-            }),
+        body: Visibility(
+          visible: isLoading,
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+          replacement: RefreshIndicator(
+            onRefresh: fetchTodo,
+            child: ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  final item = items[index] as Map;
+                  return ListTile(
+                    leading: CircleAvatar(child: Text('${index + 1}')),
+                    title: Text(item['title']),
+                    subtitle: Text(item['description']),
+                    trailing: PopupMenuButton(itemBuilder: (context) {
+                      return [
+                        const PopupMenuItem(child: Text("Edit")),
+                        const PopupMenuItem(child: Text("Delete"))
+                      ];
+                    }),
+                  );
+                }),
+          ),
+        ),
         floatingActionButton: FloatingActionButton.extended(
             onPressed: navigateToAdd, label: const Text("Add Todo")));
   }
@@ -57,6 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         items = result;
       });
-    } else {}
+    }
+    setState(() {
+      isLoading = false;
+    });
   }
 }
