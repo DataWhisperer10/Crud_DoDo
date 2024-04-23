@@ -14,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   List items = [];
+  Map<String, dynamic>? selectedItem;
 
   @override
   void initState() {
@@ -25,63 +26,74 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("ToDo List"),
+      appBar: AppBar(
+        title: const Text("ToDo List"),
+      ),
+      body: Visibility(
+        visible: isLoading,
+        child: const Center(
+          child: CircularProgressIndicator(),
         ),
-        body: Visibility(
-          visible: isLoading,
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
-          replacement: RefreshIndicator(
-            onRefresh: fetchTodo,
-            child: ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index] as Map;
-                  final id = item['_id'] as String;
-                  return ListTile(
-                    leading: CircleAvatar(child: Text('${index + 1}')),
-                    title: Text(item['title']),
-                    subtitle: Text(item['description']),
-                    trailing: PopupMenuButton(onSelected: (value) {
-                      if (value == 'edit') {
-                        navigateToEdit();
-                        //open the edit screen
-                      } else if (value == 'delete') {
+        replacement: RefreshIndicator(
+          onRefresh: fetchTodo,
+          child: ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final item = items[index] as Map;
+              final id = item['_id'] as String;
+              return ListTile(
+                leading: CircleAvatar(child: Text('${index + 1}')),
+                title: Text(item['title']),
+                subtitle: Text(item['description']),
+                trailing: PopupMenuButton(
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      navigateToEdit(item);
+                      //open the edit screen
+                    } else if (value == 'delete') {
 //open the delete screen
-                        deleteById(id);
-                      }
-                    }, itemBuilder: (context) {
-                      return [
-                        const PopupMenuItem(
-                          child: Text("Edit"),
-                          value: 'edit',
-                        ),
-                        const PopupMenuItem(
-                          child: Text("Delete"),
-                          value: 'delete',
-                        )
-                      ];
-                    }),
-                  );
-                }),
+                      deleteById(id);
+                    }
+                  },
+                  itemBuilder: (context) {
+                    return [
+                      const PopupMenuItem(
+                        child: Text("Edit"),
+                        value: 'edit',
+                      ),
+                      const PopupMenuItem(
+                        child: Text("Delete"),
+                        value: 'delete',
+                      ),
+                    ];
+                  },
+                ),
+              );
+            },
           ),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-            onPressed: navigateToAdd, label: const Text("Add Todo")));
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: navigateToAdd,
+        label: const Text("Add Todo"),
+      ),
+    );
   }
 
-  void navigateToEdit() {
+  void navigateToEdit(Map item) {
     final route =
-        MaterialPageRoute(builder: (context) => const AddPageScreen());
+        MaterialPageRoute(builder: (context) => AddPageScreen(todo: item));
     Navigator.push(context, route);
   }
 
-  void navigateToAdd() {
+  Future<void> navigateToAdd() async {
     final route =
         MaterialPageRoute(builder: (context) => const AddPageScreen());
-    Navigator.push(context, route);
+    await Navigator.push(context, route);
+    setState(() {
+      isLoading = true;
+    });
+    fetchTodo();
   }
 
   Future<void> deleteById(String id) async {

@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class AddPageScreen extends StatefulWidget {
-  const AddPageScreen({super.key});
+  final Map? todo;
+  const AddPageScreen({
+    super.key,
+    this.todo,
+  });
 
   @override
   State<AddPageScreen> createState() => _AddPageScreenState();
@@ -13,34 +17,55 @@ class AddPageScreen extends StatefulWidget {
 class _AddPageScreenState extends State<AddPageScreen> {
   TextEditingController titleEditingController = TextEditingController();
   TextEditingController descriptionEditingController = TextEditingController();
+  bool isEdit = false;
+  @override
+  void initState() {
+    super.initState();
+    if (widget.todo != null) {
+      isEdit = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Todo"),
+        title: Text(isEdit ? "Edit Todo" : "Add Todo"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: titleEditingController,
-              decoration: const InputDecoration(
-                labelText: "Title",
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(
+                controller: titleEditingController,
+                decoration: const InputDecoration(
+                  labelText: "Title",
+                ),
               ),
-            ),
-            TextField(
-              controller: descriptionEditingController,
-              decoration: const InputDecoration(labelText: "Description"),
-              minLines: 5,
-              maxLines: 10,
-              keyboardType: TextInputType.multiline,
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            ElevatedButton(onPressed: submitData, child: const Text("Submit")),
-          ],
+              TextField(
+                controller: descriptionEditingController,
+                decoration: const InputDecoration(labelText: "Description"),
+                minLines: 5,
+                maxLines: 10,
+                keyboardType: TextInputType.multiline,
+              ),
+              const SizedBox(
+                height: 30,
+              ),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple),
+                  onPressed: submitData,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Text(
+                      isEdit ? "Update" : "Submit",
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                  )),
+            ],
+          ),
         ),
       ),
     );
